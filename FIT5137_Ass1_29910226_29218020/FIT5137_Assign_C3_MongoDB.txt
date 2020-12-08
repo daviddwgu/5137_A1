@@ -1,0 +1,299 @@
+FIT5137 Assessment 1 C3 MongoDB
+Student Name: Dawei Gu, Jiexuan Du
+Student ID: 29910226, 29218020
+Tutorial Section: FIT5137 Laboratory 05, 12:00m-14:00pm Tue  
+Tutor: Agnes Haryanto
+
+#preparing
+
+#create database
+use FIT5137_Assign_C3
+
+#quit the mongoDB
+quit()
+
+#insert data into Host
+mongoimport --db FIT5137_Assign_C3 --collection Host --file D:\host.json
+
+#insert data into Listing
+mongoimport --db FIT5137_Assign_C3 --collection Listing --file D:\listing.json
+
+#run shall
+mongod
+
+#enter shall
+mongo
+
+#enter database
+use FIT5137_Assign_C3
+
+#create embedding model collection called Listing_host
+db.Listing.aggregate([
+                   {$lookup: {from:'Host', 
+                                    localField:'host_id', 
+                                    foreignField:'host_id', 
+                                    as: 'host'}},
+                   { $out : "Listing_host" }
+])
+
+#create index for Host collection
+db.Host.createIndex({'host_name':1})
+db.Host.createIndex({'host_id':1})
+
+
+#create index for Listing collection
+db.Listing.createIndex({'price':1})
+db.Listing.createIndex({'number_of_reviews':1})
+db.Listing.createIndex({'neighbourhood ':1})
+
+#create index for Listing_host collection
+db.Listing_host.createIndex({'price':1})
+db.Listing_host.createIndex({'host.host_name':1})
+db.Listing_host.createIndex({'number_of_reviews ':1})
+
+1.
+#Referencing code:
+db.Listing.aggregate([
+{$match: {"last_review": {"$gte": new Date('2018-12-01'), "$lte": new Date('2018-12-31')}}},
+{$group:{'_id':null, 'total':{$sum:1}}}
+])
+
+#Embedding code:
+db.Listing_host.aggregate([
+{$match: {"last_review": {"$gte": new Date('2018-12-01'), "$lte": new Date('2018-12-31')}}},
+{$group:{'_id':null, 'total':{$sum:1}}}
+])
+
+
+2.
+#Referencing code:
+db.Listing.aggregate([
+    { "$match": {"neighbourhood":"Port Phillip"}},
+    { "$group": {"_id": null, "averageprice": { "$avg": "$price" }}}
+])
+
+#Embedding code:
+db.Listing_host.aggregate([
+    { "$match": {"neighbourhood":"Port Phillip"}},
+    { "$group": {"_id": null, "averageprice": { "$avg": "$price" }}}
+])
+
+
+3.
+#Referencing code:
+db.Listing.aggregate([
+{$group:{'_id':'$neighbourhood', 'average':{$avg:'$reviews_per_month'}}},
+{ $sort: { 'average': -1 } },
+{ $limit: 10 }
+])
+
+#Embedding code:
+db.Listing_host.aggregate([
+{$group:{'_id':'$neighbourhood', 'average':{$avg:'$reviews_per_month'}}},
+{ $sort: { 'average': -1 } },
+{ $limit: 10 }
+])
+
+
+4.
+#Referencing code:
+db.Listing.aggregate([ 
+   {"$match": {"street" : {$regex : ".*Melbourne.*"}}},
+   { "$group": { "_id": null, "max": { "$max": "$number_of_reviews" }, "min": { "$min": "$number_of_reviews" } }}
+])
+
+#Embedding code:
+db.Listing_host.aggregate([ 
+   {"$match": {"street" : {$regex : ".*Melbourne.*"}}},
+   { "$group": { "_id": null, "max": { "$max": "$number_of_reviews" }, "min": { "$min": "$number_of_reviews" } }}
+])
+
+
+5.
+#Referencing code:
+db.Listing.aggregate([
+{$group:{'_id':'$room_type', 'total':{$sum:1}}},
+{ $sort: { 'total': -1 } },
+{ $limit: 1 }
+])
+
+#Embedding code:
+db.Listing_host.aggregate([
+{$group:{'_id':'$room_type', 'total':{$sum:1}}},
+{ $sort: { 'total': -1 } },
+{ $limit: 1 }
+])
+
+
+6.
+#Referencing code:
+db.Listing.find({},{"_id":0,"street":1}).sort({"price":-1}).limit(5)
+
+#Embedding code:
+db.Listing_host.find({},{"_id":0,"street":1}).sort({"price":-1}).limit(5)
+
+
+7. 
+#Referencing code:
+db.Listing.aggregate([
+{$lookup:
+             {from:'Host',
+              localField:'host_id',
+              foreignField:'host_id',
+              as: 'host'}},
+{$match:{'host.host_name':'Eleni'}},
+{$project:{'name':1, 'host.host_name':1}}
+          ])
+
+#Embedding code:
+db.Listing_host.find({'host.host_name':'Eleni'},{'name':1, 'host.host_name':1})
+
+8.
+#Referencing code:
+db.Listing.aggregate([
+{"$match":{"room_type":"Entire home/apt"}},
+{$lookup:{from:'Host',localField:'host_id',foreignField:'host_id',as:'result'}},
+{"$match":{"result.host_response_time":"within a few hours"}},
+{$project:{_id:0,name:1,'room_type':1,'result.host_response_time':1}}
+])
+
+#Embedding code:
+db.Listing_host.find({"host.host_response_time":"within a few hours",
+                                 "room_type":"Entire home/apt"},
+                                 {_id:0,name:1,'room_type':1,'host.host_response_time':1})
+
+
+9.
+#Referencing code:
+db.Listing.aggregate([
+{$lookup:
+             {from:'Host',
+              localField:'host_id',
+              foreignField:'host_id',
+              as: 'host'}},
+{$match:{'host.host_name':'Colin', 'amenities':{$regex:'.*Internet'}, 'amenities':{$regex:'.*Gym'}}}
+]).pretty()
+
+#Embedding code:
+db.Listing_host.find({'host.host_name':'Colin', 'amenities':{$regex:'.*Internet'}, 'amenities':{$regex:'.*Gym'}}).pretty()
+
+
+10.
+#Referencing code:
+db.Listing.find({"name" : {$regex : ".*Beautiful.*"},"street" : {$regex : ".*Clayton.*"}},{"room_type":1,"price":1})
+
+#Embedding code:
+db.Listing_host.find({"name" : {$regex : ".*Beautiful.*"},"street" : {$regex : ".*Clayton.*"}},{"room_type":1,"price":1})
+
+
+11.
+#Referencing code:
+db.Listing.aggregate([
+{$project:{'list_information':{$concat:['$name', ',' , '$street', ',' , '$neighbourhood']}}}
+]).pretty()
+
+#Embedding code:
+db.Listing_host.aggregate([
+{$project:{'list_information':{$concat:['$name', ',' , '$street', ',' , '$neighbourhood']}}}
+]).pretty()
+
+
+12.
+#Referencing code:
+db.Listing.aggregate([
+{$sort:{"availability_365":-1}},
+{$limit:1},
+{$project:{'_id':0, 'name':1, 'id':1, 'host_id':1, 'street':1, 'price':1, 'availability_365':1, 'generation_time':Date()}}
+]).pretty()
+
+#Embedding code:
+db.Listing_host.aggregate([
+{$sort:{"availability_365":-1}},
+{$limit:1},
+{$project:{'_id':0, 'name':1, 'id':1, 'host_id':1, 'street':1, 'price':1, 'availability_365':1, 'generation_time':Date()}}
+]).pretty()
+
+
+13. 
+#Referencing code:
+db.Listing.aggregate([
+{$group:{'_id':'$neighbourhood', 'price':{$avg:'$price'}}},
+{$match:{'price':{$gt:50}}},
+{ $sort: { '_id': -1 } },
+])
+
+#Embedding code:
+db.Listing_host.aggregate([
+{$group:{'_id':'$neighbourhood', 'price':{$avg:'$price'}}},
+{$match:{'price':{$gt:50}}},
+{ $sort: { '_id': -1 } },
+])
+
+
+14. 
+#Referencing code:
+db.Host.aggregate([
+   {$project: {
+        _id:0,host_id: 1,host_name:1,
+         number_of_verification_methods: { $cond: { if: { $isArray: "$host_verifications" }, then: { $size: "$host_verifications" }, else: "NA"} }
+      }
+   },{$sort:{ number_of_verification_methods:-1}}
+] )
+
+#Embedding code:
+db.Listing_host.aggregate([
+{$group:{'_id':{'host_id':'$host.host_id','host_name':'$host.host_name', 'num':'$host.host_verifications' }}},
+{$project: {'_id':0, 'host_id':{"$arrayElemAt": ["$_id.host_id", 0]}, 
+                  'host_name':{"$arrayElemAt": ["$_id.host_name", 0]}, 
+                  'number of verification methods': { $size:{"$arrayElemAt": ["$_id.num", 0]} }}},
+{ $sort: { 'number of verification methods': -1 } }
+])
+
+
+Additional Q1.Number of listing, average price, max price, min price in each city, 
+                       and sort by the number of listing order. 
+#Referencing code:
+db.Listing.aggregate([
+{$group:{'_id':'$street',  'total':{$sum:1}, 'average_price':{$avg:'$price'}, 
+'max_price':{$max:'$price'}, 'min_price':{$min:'$price'},}},
+{ $sort: { 'total': -1 } }
+])
+
+#Embedding code:
+db.Listing_host.aggregate([
+{$group:{'_id':'$street',  'total':{$sum:1}, 'average_price':{$avg:'$price'}, 
+'max_price':{$max:'$price'}, 'min_price':{$min:'$price'},}},
+{ $sort: { 'total': -1 } }
+])
+
+
+Additional Q2. Count the number of amernities in each listings. 
+#Referencing code:
+db.Listing.aggregate([
+  { $project : { id:'$id', name:'$name', amernites : { $split: ["$amenities", ","] }, qty : 1 } },
+  { $unwind : "$amernites" },
+  { $group : { _id: { "listing_id" : "$id", 'name':'$name' }, amernities_num: { "$sum" : 1 } } },
+  { $sort : { listing_id : -1 } }
+])
+
+#Embedding code:
+db.Listing_host.aggregate([
+  { $project : { id:'$id', name:'$name', amernites : { $split: ["$amenities", ","] }, qty : 1 } },
+  { $unwind : "$amernites" },
+  { $group : { _id: { "listing_id" : "$id", 'name':'$name' }, amernities_num: { "$sum" : 1 } } },
+  { $sort : { listing_id : -1 } }
+])
+
+
+Additional Q3. Count how many host which room_type is "Private room" and the host_verification allows email.
+#Referencing code:
+db.Listing.aggregate([
+{"$match":{"room_type":"Private room"}},
+{$lookup:{from:'Host',localField:'host_id',foreignField:'host_id',as:'result'}},
+{"$match":{"result.host_verifications":"email"}},
+{$count: "name"}
+])
+
+#Embedding code:
+db.Listing_host.count({"host.host_verifications":"email","room_type":"Private room"})
+

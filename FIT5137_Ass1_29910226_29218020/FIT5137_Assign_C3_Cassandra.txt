@@ -1,0 +1,82 @@
+FIT5137 Assessment 1 C3 MongoDB
+Student Name: Dawei Gu, Jiexuan Du
+Student ID: 29910226, 29218020
+Tutorial Section: FIT5137 Laboratory 05, 12:00m-14:00pm Tue  
+Tutor: Agnes Haryanto
+
+
+#preparation
+#create the keyspace
+CREATE KEYSPACE FIT5137_Assign_C3 with 
+ replication = {'class':'SimpleStrategy', 'replication_factor':1};
+
+#swich to keyspace
+USE FIT5137_Assign_C3;
+
+#create table in keyspace
+CREATE TABLE review (listing_id  text,
+                                      review_id text,                                      
+                                      review_date date,                                      
+                                      reviewer_id  text,
+                                      reviewer_name text,
+                                      review_scores  int,
+                                      comments text,
+                                      PRIMARY KEY (listing_id, review_date));
+
+#insert data into table
+COPY review (listing_id, review_id, review_date, reviewer_id, reviewer_name, review_scores, comments) 
+FROM 'D:\review.csv' WITH HEADER = true AND ESCAPE = '"' ;
+
+#check the number of row is equal to 8208 or not
+SELECT COUNT(*) FROM review;
+
+#create second index
+CREATE INDEX ON review (review_date);
+
+
+15.
+#find the recent date first
+SELECT review_date FROM review WHERE listing_id = '10803';
+
+#base on the listing id and recent date find the recent review
+SELECT listing_id, review_id, review_date, reviewer_id, reviewer_name, review_scores,   
+    comments FROM review WHERE listing_id = '10803' AND review_date = '2019-06-19'; 
+
+
+16.
+SELECT listing_id, review_id, review_date, reviewer_id, reviewer_name, review_scores, comments   
+  FROM review WHERE review_scores>=70 AND review_scores<=90 ALLOW FILTERING;
+
+
+17.
+SELECT listing_id, reviewer_name, comments FROM review WHERE review_scores < 50 ALLOW FILTERING;
+
+18.
+SELECT count(*) FROM review WHERE review_date >= '2015-1-1' AND review_date <='2015-12-31' ALLOW FILTERING;
+
+19.
+#find the highest scores in that day
+SELECT MAX(review_scores) FROM review WHERE review_date = '2017-03-26'; 
+
+#base on the highest scores and date to dispace the review
+SELECT listing_id, review_id, review_date, reviewer_id, reviewer_name, review_scores,   
+    comments FROM review WHERE review_scores = 100 AND review_date = '2017-03-26' ALLOW FILTERING; 
+
+20.
+#find the highest scores in table
+SELECT MAX(review_scores) FROM review;
+
+#dispace the review with the highest review scores
+SELECT listing_id,reviewer_name, review_scores FROM review WHERE review_scores = 100;
+
+
+Additional Q4. What is the number of review of each listing?
+SELECT listing_id, COUNT(*) FROM review GROUP BY listing_id;
+
+
+Additional Q5. Display the  highest rating and lowest rating left in 2014.
+SELECT min(review_scores), max(review_scores) FROM review WHERE  review_date >= '2014-1-1' AND review_date <='2014-12-31' ALLOW FILTERING;
+
+
+
+

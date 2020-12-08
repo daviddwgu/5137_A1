@@ -1,0 +1,66 @@
+FIT5137 Assessment 1 C2
+Student Name: Dawei Gu, Jiexuan Du
+Student ID: 29910226, 29218020
+Tutorial Section: FIT5137 Laboratory 05, 12:00m-14:00pm Tue  
+Tutor: Agnes Haryanto
+
+#MonogoDB
+1.
+db.Host.update({'host_name':'Adam'}, {$push:{'host_vertifications': 'facebook'}})
+
+2. 
+db.Host.insertMany([
+{'host_id': 'MONHOS11', 
+ 'host_name':'Alison', 
+ 'host_vertifications':['email', 'phone','facebook', 'reviews'],
+ 'host_since': new Date('2019-01-9'),
+ 'host_location': {'city': 'Caulfield', 'state':'Victoria', 'country':'Australia'},
+ 'host_response_rate':'within an hour',
+ 'host_is_superhost':false},
+{'host_id': 'MONHOS12', 
+ 'host_name':'Mike', 
+ 'host_vertifications':['email', 'phone'],
+ 'host_since': new Date('2019-01-9'),
+ 'host_location': {'city': 'Clayton', 'state':'Victoria', 'country':'Australia'},
+ 'host_response_rate':'within a day',
+ 'host_is_superhost':true},
+{'host_id': 'MONHOS13', 
+ 'host_name':'Robyn', 
+ 'host_vertifications':['facebook', 'reviews'],
+ 'host_since': new Date('2019-01-9'),
+ 'host_location': {'city': 'Berwick', 'state':'Victoria', 'country':'Australia'},
+ 'host_response_rate':'within an hour',
+ 'host_is_superhost':false},
+{'host_id': 'MONHOS14', 
+ 'host_name':'Daniel', 
+ 'host_vertifications':['email', 'manual offline','work email'],
+ 'host_since': new Date('2019-01-9'),
+ 'host_location': {'city': 'Frankston', 'state':'Victoria', 'country':'Australia'},
+ 'host_response_rate':'within a day',
+ 'host_is_superhost':true},
+{'host_id': 'MONHOS15', 
+ 'host_name':'Ron', 
+ 'host_vertifications':['facebook'],
+ 'host_since': new Date('2019-01-9'),
+ 'host_location': {'city': 'Caulfield', 'state':'Victoria', 'country':'Australia'},
+ 'host_response_rate':'within a day',
+ 'host_is_superhost':false}
+])
+
+3. 
+db.Host.updateMany({'host_response_rate':'within an hour'}, {$set:{'host_is_superhost': true}})
+
+4. 
+db.Listing.deleteMany({'availability_365':0})
+
+5.
+db.Listing.updateMany({'neighbourhood':'Monash'}, {$set:{'neighbourhood':'Monash City'}})
+
+#Cassandra
+6.
+UPDATE review SET reason = {'space', 'price'} WHERE review_id = 'REV11';
+
+7.
+SELECT review_id FROM review WHERE reviewer_id='500015';
+DELETE FROM review WHERE  review_id = 'REV15';
+

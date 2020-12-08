@@ -1,0 +1,18 @@
+CREATE KEYSPACE FIT5137_Assign_C3 with 
+ replication = {'class':'SimpleStrategy', 'replication_factor':1};
+
+USE FIT5137_Assign_C3;
+
+CREATE TABLE review (listing_id  text,
+                                      review_id text,                                      
+                                      review_date date,                                      
+                                      reviewer_id  text,
+                                      reviewer_name text,
+                                      review_scroes  int,
+                                      comments text,
+                                      PRIMARY KEY (review_id));
+
+COPY review (listing_id, review_id, review_date, reviewer_id, reviewer_name, review_scroes, comments) FROM 'D:\review.csv' WITH HEADER = true AND ESCAPE = '"' ;
+
+SELECT COUNT(*) FROM review;
+
